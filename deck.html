@@ -1,0 +1,483 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>واتساب للتسويق — عرض القرار</title>
+<link rel="icon" href="data:,">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;800&display=swap" rel="stylesheet">
+<style>
+*{margin:0;padding:0;box-sizing:border-box}
+:root{
+  --bg:#0d1117; --card:#161b22; --line:#30363d; --txt:#e6edf3; --dim:#8b949e;
+  --off:#2f81f7;   /* رسمي */
+  --hyb:#a371f7;   /* هجين */
+  --un:#f0883e;    /* غير رسمي */
+  --ok:#3fb950; --warn:#d29922; --bad:#f85149;
+}
+body{font-family:'Cairo',sans-serif;background:var(--bg);color:var(--txt);overflow:hidden}
+.slide{
+  position:fixed;inset:0;display:none;flex-direction:column;
+  padding:3.2vh 4vw;overflow-y:auto;
+}
+.slide.on{display:flex;animation:in .35s ease}
+@keyframes in{from{opacity:0;transform:translateY(14px)}to{opacity:1;transform:none}}
+h1{font-size:clamp(28px,4.4vw,52px);font-weight:800;line-height:1.25;margin-bottom:2vh}
+h2{font-size:clamp(20px,2.5vw,32px);font-weight:800;margin-bottom:1.6vh;color:var(--txt)}
+h3{font-size:clamp(15px,1.5vw,20px);font-weight:600;margin-bottom:1vh}
+p,li{font-size:clamp(14px,1.35vw,19px);line-height:1.75;color:var(--txt)}
+.dim{color:var(--dim)}
+.tag{
+  display:inline-block;font-size:clamp(11px,1vw,14px);font-weight:600;
+  padding:.35em 1em;border-radius:99px;margin-bottom:1.6vh;
+  background:#1f6feb22;color:#58a6ff;border:1px solid #1f6feb55;
+}
+/* الشرائح المركزية */
+.center{justify-content:center;align-items:center;text-align:center}
+.center h1{max-width:22ch}
+/* الجداول */
+table{width:100%;border-collapse:collapse;font-size:clamp(11px,1.12vw,16px)}
+th,td{padding:.72em .6em;text-align:right;border-bottom:1px solid var(--line)}
+th{background:#1f2937;font-weight:700;font-size:.94em;position:sticky;top:0}
+tbody tr:hover{background:#ffffff07}
+td.n{font-variant-numeric:tabular-nums;white-space:nowrap}
+.tw{overflow:auto;flex:1;border:1px solid var(--line);border-radius:12px}
+/* الكروت */
+.grid{display:grid;gap:1.6vh 1.4vw;flex:1}
+.g3{grid-template-columns:repeat(3,1fr)}
+.g2{grid-template-columns:repeat(2,1fr)}
+.card{
+  background:var(--card);border:1px solid var(--line);border-radius:14px;
+  padding:1.8vh 1.4vw;display:flex;flex-direction:column;gap:.8vh;
+}
+.card.off{border-top:4px solid var(--off)}
+.card.hyb{border-top:4px solid var(--hyb)}
+.card.un{border-top:4px solid var(--un)}
+.card h3{font-size:clamp(16px,1.75vw,24px);font-weight:800}
+.card .big{font-size:clamp(22px,2.6vw,38px);font-weight:800;font-variant-numeric:tabular-nums}
+.card ul{list-style:none;display:flex;flex-direction:column;gap:.5vh}
+.card li{font-size:clamp(12px,1.15vw,16px);line-height:1.55;display:flex;gap:.5em}
+.o{color:var(--off)}.h{color:var(--hyb)}.u{color:var(--un)}
+.ok{color:var(--ok)}.wr{color:var(--warn)}.bd{color:var(--bad)}
+/* بلوك تحذير/تركيز */
+.box{
+  background:var(--card);border:1px solid var(--line);border-radius:12px;
+  padding:1.6vh 1.4vw;margin-bottom:1.4vh;
+}
+.box.red{border-right:5px solid var(--bad);background:#f8514911}
+.box.grn{border-right:5px solid var(--ok);background:#3fb95011}
+.box.yel{border-right:5px solid var(--warn);background:#d2992211}
+.box.pur{border-right:5px solid var(--hyb);background:#a371f711}
+.box b{font-weight:800}
+/* كود/رسم */
+pre{
+  background:#010409;border:1px solid var(--line);border-radius:10px;
+  padding:1.4vh 1.2vw;font-size:clamp(10px,1.05vw,15px);line-height:1.7;
+  overflow:auto;font-family:ui-monospace,monospace;direction:ltr;text-align:right;
+}
+/* شريط التقدم والتنقل */
+.bar{position:fixed;bottom:0;right:0;left:0;height:4px;background:#ffffff10;z-index:20}
+.bar i{display:block;height:100%;background:linear-gradient(90deg,var(--off),var(--hyb));transition:width .3s}
+.nav{
+  position:fixed;bottom:14px;left:16px;display:flex;gap:8px;align-items:center;z-index:21;
+  font-size:12px;color:var(--dim);
+}
+.nav button{
+  background:var(--card);color:var(--txt);border:1px solid var(--line);
+  width:32px;height:32px;border-radius:8px;cursor:pointer;font-size:15px;
+}
+.nav button:hover{background:#21262d;border-color:var(--off)}
+.pill{
+  position:fixed;top:14px;left:16px;font-size:11px;color:var(--dim);
+  background:var(--card);border:1px solid var(--line);padding:.3em .9em;border-radius:99px;z-index:21;
+}
+ul.plain{list-style:none;display:flex;flex-direction:column;gap:1vh}
+ul.plain li{display:flex;gap:.6em;align-items:flex-start}
+.ask{counter-reset:a;list-style:none;display:flex;flex-direction:column;gap:1.1vh}
+.ask li{counter-increment:a;display:flex;gap:.9em;align-items:flex-start}
+.ask li::before{
+  content:counter(a);flex:0 0 1.9em;height:1.9em;border-radius:50%;
+  background:var(--off);color:#fff;font-weight:800;display:grid;place-items:center;
+  font-size:.85em;margin-top:.15em;
+}
+@media print{.slide{display:flex!important;position:relative;page-break-after:always;height:100vh}.nav,.bar,.pill{display:none}}
+</style>
+</head>
+<body>
+
+<!-- 1 غلاف -->
+<section class="slide on center">
+  <span class="tag">عرض قرار · أغسطس 2026</span>
+  <h1>الوصول لعملائنا على واتساب<br><span class="dim" style="font-size:.6em">3 طرق — الفرق في المخاطرة والتكلفة</span></h1>
+  <p class="dim" style="margin-top:2vh">الفرق بينهم مش تقني. الفرق في المخاطرة والتكلفة.</p>
+</section>
+
+<!-- 2 الأمانة أولاً -->
+<section class="slide">
+  <span class="tag">قبل أي حاجة</span>
+  <h2>3 حاجات لازم تعرفها بصراحة</h2>
+  <div class="box red">
+    <p><b>1. طريقتين من التلاتة مخالفة لشروط استخدام واتساب.</b><br>
+    مش قانون جنائي — لكن Meta ليها كل الحق تحظر الأرقام. وده احتمال حقيقي مش نظري.</p>
+  </div>
+  <div class="box yel">
+    <p><b>2. سعر واحد مهم في حساباتي لسه مش معلوم.</b><br>
+    Meta أعلنت إنها هتحاسب على رسائل الردود من أكتوبر 2026 — <b>لكن منشرتش السعر</b>.
+    كل أرقامي مبنية على تقدير <b>$0.008/رسالة</b>. عندي جدول حساسية بـ 5 احتمالات.</p>
+  </div>
+  <div class="box grn">
+    <p><b>3. فيه حاجة واحدة مؤكدة 100% ومكسب صافي:</b><br>
+    نافذة <b>72 ساعة مجانية بالكامل</b> لما العميل يضغط إعلان واتساب.
+    مش داخلة في أي تغيير أسعار. <b>وعليها بنيت توصيتي.</b></p>
+  </div>
+</section>
+
+<!-- 3 الخيارات التلاتة -->
+<section class="slide">
+  <span class="tag">نظرة سريعة</span>
+  <h2>الخيارات التلاتة</h2>
+  <div class="grid g3">
+    <div class="card off">
+      <h3 class="o">🏢 رسمي بالكامل</h3>
+      <p class="dim" style="font-size:.85em">WhatsApp Cloud API من Meta</p>
+      <div class="big o">$222<span style="font-size:.5em">-272</span></div>
+      <p class="dim" style="font-size:.8em">شهرياً · يبقى $299-349 بعد أكتوبر</p>
+      <ul>
+        <li><span class="ok">✅</span> خطر حظر = صفر</li>
+        <li><span class="ok">✅</span> أزرار تفاعلية → تحويل أعلى</li>
+        <li><span class="ok">✅</span> أبسط صيانة (2-4 أسابيع)</li>
+        <li><span class="bd">❌</span> التكلفة تزيد أكتوبر</li>
+        <li><span class="bd">❌</span> سقف ~2 رسالة تسويق/عميل</li>
+      </ul>
+    </div>
+    <div class="card hyb">
+      <h3 class="h">🔀 هجين</h3>
+      <p class="dim" style="font-size:.85em">رسمي للتسويق + غير رسمي للمحادثات</p>
+      <div class="big h">$272<span style="font-size:.5em">-342</span></div>
+      <p class="dim" style="font-size:.8em">شهرياً · <b class="ok">ثابت — أكتوبر مش بيأثر</b></p>
+      <ul>
+        <li><span class="ok">✅</span> محصّن ضد تغيير أكتوبر</li>
+        <li><span class="ok">✅</span> التسويق (الخطر) على الرسمي</li>
+        <li><span class="ok">✅</span> المحادثات (التكلفة) مجاناً</li>
+        <li><span class="bd">❌</span> تعقيد 3 أضعاف</li>
+        <li><span class="bd">❌</span> محتاج مطوّر <b>دائم</b></li>
+      </ul>
+    </div>
+    <div class="card un">
+      <h3 class="u">⚡ غير رسمي بالكامل</h3>
+      <p class="dim" style="font-size:.85em">Baileys على أرقام عادية</p>
+      <div class="big bd">$363<span style="font-size:.5em">-704</span></div>
+      <p class="dim" style="font-size:.8em">شهرياً · <b class="bd">الأغلى فعلياً</b></p>
+      <ul>
+        <li><span class="ok">✅</span> حرية كاملة، مفيش قوالب</li>
+        <li><span class="bd">❌</span> ممكن نخسر كل الأرقام</li>
+        <li><span class="bd">❌</span> مفيش أزرار → تحويل أقل 15-30%</li>
+        <li><span class="bd">❌</span> تكلفة مخفية $220-425</li>
+        <li><span class="bd">❌</span> مخاطرة قانونية (TCPA)</li>
+      </ul>
+    </div>
+  </div>
+</section>
+
+<!-- 4 المفاجأة: المجاني هو الأغلى -->
+<section class="slide">
+  <span class="tag">أهم تصحيح</span>
+  <h2>"المجاني" هو الأغلى فعلياً</h2>
+  <div class="box red">
+    <p>الخيار غير الرسمي بيبان مجاني لأن مفيش فاتورة من Meta.
+    لكن <b>التكلفة المخفية أكبر من المباشرة</b>.</p>
+  </div>
+  <div class="tw">
+  <table>
+    <thead><tr><th>البند</th><th>غير رسمي بالكامل</th><th>ملاحظة</th></tr></thead>
+    <tbody>
+      <tr><td>سيرفرات + بروكسي + شرائح</td><td class="n">$143 – 279</td><td class="dim">تكلفة مباشرة ظاهرة</td></tr>
+      <tr><td><b>وقت المطوّر</b> (تدفئة، مراقبة، إنقاذ جلسات)</td><td class="n bd">$220 – 425</td><td class="dim">🔴 التكلفة المخفية</td></tr>
+      <tr><td>أرقام محروقة + إعادة تدفئة</td><td class="n">داخلة فوق</td><td class="dim">21 يوم لكل رقم جديد</td></tr>
+      <tr style="background:#f8514915"><td><b>الإجمالي الحقيقي</b></td><td class="n bd"><b>$363 – 704</b></td><td class="dim">أغلى من الرسمي بـ 1.6×</td></tr>
+      <tr><td>خسارة إيراد (مفيش أزرار → تحويل أقل 15-30%)</td><td class="n bd">غير محسوبة</td><td class="dim">بندفع أكتر وبنبيع أقل</td></tr>
+      <tr><td>مخاطرة خسارة كل الأرقام مرة واحدة</td><td class="n bd">غير محسوبة</td><td class="dim">Cluster Ban</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="box yel" style="margin-top:1.4vh">
+    <p><b>الخلاصة:</b> غير رسمي بالكامل هو الخيار الوحيد اللي <b>بيخسر في التلات جبهات</b> — أغلى، وأخطر، وبيبيع أقل.</p>
+  </div>
+</section>
+
+<!-- 5 نقطة التعادل -->
+<section class="slide">
+  <span class="tag">🔴 أهم رقم في العرض</span>
+  <h2>الهجين مبيوفّرش دايماً — نقطة التعادل ~625 محادثة/شهر</h2>
+  <p class="dim" style="margin-bottom:1.4vh">الفرق الحقيقي مش في التسويق (الاتنين بيدفعوه) — في <b>ردود البوت</b>. والسيرفر بيكلّف $60 ثابت.</p>
+  <div class="tw">
+  <table>
+    <thead><tr><th>محادثات/شهر</th><th>ردود بوت</th><th>🏢 رسمي (بعد أكتوبر)</th><th>🔀 هجين (سيرفر)</th><th>الفايز</th></tr></thead>
+    <tbody>
+      <tr><td class="n">250</td><td class="n dim">3,000</td><td class="n">$24</td><td class="n">$60</td><td class="o">🏢 رسمي +$36</td></tr>
+      <tr><td class="n">500</td><td class="n dim">6,000</td><td class="n">$48</td><td class="n">$60</td><td class="o">🏢 رسمي +$12</td></tr>
+      <tr style="background:#d2992218"><td class="n"><b>625</b></td><td class="n dim">7,500</td><td class="n"><b>$60</b></td><td class="n"><b>$60</b></td><td class="wr"><b>⚖️ التعادل</b></td></tr>
+      <tr><td class="n">1,000</td><td class="n dim">12,000</td><td class="n">$96</td><td class="n">$60</td><td class="h">🔀 هجين +$36</td></tr>
+      <tr><td class="n">2,000</td><td class="n dim">24,000</td><td class="n">$192</td><td class="n">$60</td><td class="h">🔀 هجين +$132</td></tr>
+      <tr><td class="n">5,000</td><td class="n dim">60,000</td><td class="n">$480</td><td class="n">$90</td><td class="h">🔀 هجين +$390</td></tr>
+      <tr style="background:#a371f715"><td class="n">10,000</td><td class="n dim">120,000</td><td class="n">$960</td><td class="n">$120</td><td class="h"><b>🔀 هجين +$840</b></td></tr>
+      <tr style="background:#a371f715"><td class="n">20,000</td><td class="n dim">240,000</td><td class="n">$1,920</td><td class="n">$170</td><td class="h"><b>🔀 هجين +$1,750</b></td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="box pur" style="margin-top:1.4vh">
+    <p>🎯 <b>عشان كده أول حاجة محتاجها منك: عدد محادثاتنا الشهري الحقيقي.</b> بدونه مش هينفع نقرّر بين رسمي وهجين.</p>
+  </div>
+</section>
+
+<!-- 6 الحساسية -->
+<section class="slide">
+  <span class="tag">شفافية</span>
+  <h2>لو سعر أكتوبر طلع مختلف — القرار بيتغيّر</h2>
+  <div class="box yel">
+    <p>الجدول اللي فات مبني على تقدير <b>$0.008/رسالة</b>. <b>Meta منشرتش السعر الحقيقي.</b>
+    فده القرار في 5 احتمالات — عند 2,000 محادثة/شهر:</p>
+  </div>
+  <div class="tw">
+  <table>
+    <thead><tr><th>سعر الرسالة المفترض</th><th>🏢 رسمي/شهر</th><th>🔀 هجين</th><th>الفرق</th><th>الحكم</th></tr></thead>
+    <tbody>
+      <tr><td class="n">$0.004 (أرخص احتمال)</td><td class="n">$96</td><td class="n">$70</td><td class="n">+$26</td><td class="wr">🟡 التعقيد مش مستحق</td></tr>
+      <tr><td class="n">$0.006</td><td class="n">$144</td><td class="n">$70</td><td class="n">+$74</td><td class="wr">🟡 على الحدود</td></tr>
+      <tr style="background:#a371f715"><td class="n"><b>$0.008 (تقديرنا)</b></td><td class="n"><b>$192</b></td><td class="n"><b>$70</b></td><td class="n"><b>+$122</b></td><td class="ok">🟢 الهجين يستاهل</td></tr>
+      <tr><td class="n">$0.012</td><td class="n">$288</td><td class="n">$70</td><td class="n">+$218</td><td class="ok">🟢 واضح</td></tr>
+      <tr><td class="n">$0.020 (أغلى احتمال)</td><td class="n">$480</td><td class="n">$70</td><td class="n">+$410</td><td class="ok">🟢 إجباري</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="box pur" style="margin-top:1.4vh">
+    <p>🎯 <b>عشان كده توصيتي مرحلية:</b> نبدأ رسمي، ولما Meta تنشر السعر الحقيقي نقرّر لو الهجين يستاهل الاستثمار.
+    <b>مش بوعدك بحاجة على معلومة ناقصة.</b></p>
+  </div>
+</section>
+
+<!-- 7 مخاطر الرسمي -->
+<section class="slide">
+  <span class="tag">مخاطر · 1 من 3</span>
+  <h2 class="o">🏢 رسمي بالكامل — إيه اللي ممكن يغلط</h2>
+  <div class="tw">
+  <table>
+    <thead><tr><th>الخطر</th><th>الاحتمال</th><th>الأثر</th><th>التعامل</th></tr></thead>
+    <tbody>
+      <tr><td>🔴 <b>التكلفة تزيد أكتوبر 2026</b> — رسائل الردود بتبقى مدفوعة</td><td class="bd">مؤكد (معلن)</td><td class="wr">متوسط-عالي</td><td class="dim">حد ميزانية أوتوماتيك</td></tr>
+      <tr><td>🔴 <b>سقف ~2 رسالة تسويق/عميل/24س</b> — على مستوى Meta كلها</td><td class="bd">مؤكد</td><td class="wr">متوسط</td><td class="dim">يحدّ عدد الحملات</td></tr>
+      <tr><td>🟠 حد يومي يبدأ 250 رسالة</td><td class="bd">مؤكد</td><td class="ok">منخفض</td><td class="dim">بيترقّى بالاستخدام</td></tr>
+      <tr><td>🟠 رفض القوالب — كل رسالة تسويق لازم قالب معتمد</td><td class="wr">عالي أول شهر</td><td class="wr">متوسط</td><td class="dim">فاحص قبلي + قوالب عامة</td></tr>
+      <tr><td>🟠 تقييم الجودة يبقى أحمر لو الناس بلّغت</td><td class="wr">متوسط</td><td class="bd">عالي</td><td class="dim">محتوى وجمهور صح</td></tr>
+      <tr><td>🟡 هامش الـ BSP على سعر Meta</td><td class="wr">لو استخدمنا BSP</td><td class="ok">منخفض</td><td class="dim">Cloud API مباشر</td></tr>
+      <tr><td>🟡 التحقق من الأعمال 2 أيام – 3 أسابيع</td><td class="bd">مؤكد</td><td class="ok">منخفض</td><td class="dim">نبدأه فوراً</td></tr>
+    </tbody>
+  </table>
+  </div>
+  <div class="box grn" style="margin-top:1.4vh">
+    <p>✅ <b>الميزة اللي متتعوّضش:</b> الأرقام مش بتتحظر. خلاص. مفيش قلق ومفيش خطة طوارئ.</p>
+  </div>
+</section>
+
+<!-- 8 مخاطر غير الرسمي -->
+<section class="slide">
+  <span class="tag">مخاطر · 2 من 3</span>
+  <h2 class="u">⚡ غير رسمي بالكامل — أخطر قايمة</h2>
+  <div class="tw">
+  <table>
+    <thead><tr><th>الخطر</th><th>الاحتمال</th><th>الأثر</th><th>التعامل</th></tr></thead>
+    <tbody>
+      <tr><td>🔴 <b>حظر الأرقام</b> — الخطر الأساسي والدائم</td><td class="bd">عالي</td><td class="bd">عالي</td><td class="dim">تدفئة 21 يوم + تأخير بشري</td></tr>
+      <tr><td>🔴 <b>Cluster Ban</b> — رقم يتحظر يجرّ الباقي معاه</td><td class="wr">متوسط</td><td class="bd">كارثي</td><td class="dim">عزل شبكي كامل</td></tr>
+      <tr><td>🔴 <b>Meta تغيّر البروتوكول</b> فالمكتبات تبطّل فجأة</td><td class="wr">متوسط سنوياً</td><td class="bd">عالي</td><td class="dim">محرّك قابل للتبديل</td></tr>
+      <tr><td>🔴 <b>TCPA لأمريكا — $500-1,500 لكل رسالة</b></td><td class="wr">يعتمد على السوق</td><td class="bd">كارثي</td><td class="dim">متبعتش لأمريكا</td></tr>
+      <tr><td>🔴 <b>مفيش أزرار موثوقة</b> → تحويل أقل 15-30%</td><td class="bd">مؤكد</td><td class="bd">عالي</td><td class="dim">قوايم مرقّمة (أضعف)</td></tr>
+      <tr><td>🟠 التكلفة المخفية ($220-425) أكبر من المباشرة</td><td class="bd">مؤكد</td><td class="wr">متوسط</td><td class="dim">⚠️ أكبر مفاجأة</td></tr>
+      <tr><td>🟠 <b>مكتبات npm ضارة</b> — لقيت malware فعلي في البحث</td><td class="bd">موجود فعلاً</td><td class="bd">كارثي</td><td class="dim">نسخ مقفولة</td></tr>
+      <tr><td>🟡 خطر على الـ Business Manager لو ربطناه</td><td class="ok">منخفض</td><td class="bd">عالي</td><td class="dim">متربطوش أبداً</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- 9 مخاطر الهجين -->
+<section class="slide">
+  <span class="tag">مخاطر · 3 من 3</span>
+  <h2 class="h">🔀 هجين — التعقيد هو الخطر</h2>
+  <pre>العميل مكلمناش  →  🏢 رسمي (قالب معتمد)    — عشان نتجنّب خطر الحظر
+العميل كلّمنا    →  ⚡ غير رسمي (رسالة حرة)  — عشان التكلفة والمرونة
+رسائل مهمة (تأكيد/شحن) → 🏢 رسمي دايماً      — عشان لازم توصل</pre>
+  <div class="tw" style="margin-top:1.2vh">
+  <table>
+    <thead><tr><th>الخطر</th><th>الاحتمال</th><th>الأثر</th><th>التعامل</th></tr></thead>
+    <tbody>
+      <tr><td>🔴 <b>تعقيد 3 أضعاف</b> — نظامين + طبقة توجيه</td><td class="bd">مؤكد</td><td class="bd">عالي</td><td class="dim">طبقة تجريد + اختبارات</td></tr>
+      <tr style="background:#f8514915"><td>🔴 <b>محتاج مطوّر دائم</b> — مش نظام "يشتغل ويُنسى"</td><td class="bd">مؤكد</td><td class="bd">عالي</td><td class="dim">⚠️ أهم سؤال للقرار</td></tr>
+      <tr><td>🔴 وقت التنفيذ 8-10 أسابيع (الأطول)</td><td class="bd">مؤكد</td><td class="wr">متوسط</td><td class="dim">تشغيل تدريجي 5%→100%</td></tr>
+      <tr><td>🟠 إرسال مزدوج — رسالة تتبعت من القناتين</td><td class="wr">لو التصميم غلط</td><td class="bd">عالي</td><td class="dim">مفتاح منع تكرار إجباري</td></tr>
+      <tr><td>🟠 opt-out لازم يشتغل على القناتين فوراً</td><td class="wr">متوسط</td><td class="bd">عالي (قانوني)</td><td class="dim">قاعدة بيانات واحدة</td></tr>
+      <tr><td>🟠 الأرقام غير الرسمية لسه معرّضة للحظر (أقل بكتير)</td><td class="wr">متوسط</td><td class="wr">متوسط</td><td class="dim">تحويل تلقائي للرسمي</td></tr>
+      <tr><td>🟡 تحت 625 محادثة/شهر مبيوفّرش</td><td class="wr">يعتمد على حجمنا</td><td class="wr">متوسط</td><td class="dim">نتأكد من الرقم الأول</td></tr>
+    </tbody>
+  </table>
+  </div>
+</section>
+
+<!-- 10 CTWA -->
+<section class="slide">
+  <span class="tag">🎁 الورقة الرابحة · مؤكدة 100%</span>
+  <h2>إعلان واتساب = 72 ساعة محادثة مجانية</h2>
+  <div class="grid g2" style="flex:0">
+    <div class="card un">
+      <h3>الطريقة العادية (بنبعت إحنا)</h3>
+      <ul>
+        <li><span class="bd">💰</span> بندفع لكل رسالة تسويق</li>
+        <li><span class="bd">⚠️</span> خطر إن الناس تبلّغ spam</li>
+        <li><span class="bd">🔴</span> سقف ~2 رسالة/عميل/24 ساعة</li>
+        <li><span class="bd">📋</span> محتاجين opt-in موثّق</li>
+      </ul>
+    </div>
+    <div class="card off">
+      <h3>طريقة CTWA (العميل بيجي لنا)</h3>
+      <ul>
+        <li><span class="ok">💰</span> بندفع للإعلان — <b>وبندفعه أصلاً</b></li>
+        <li><span class="ok">✅</span> العميل هو اللي ضغط وجه</li>
+        <li><span class="ok">✅</span> مفيش سقف تكرار</li>
+        <li><span class="ok">✅</span> الضغط = موافقة ضمنية</li>
+        <li><span class="ok">🎁</span> <b>72 ساعة كل الرسائل مجاناً</b></li>
+        <li><span class="ok">✅</span> ومش داخلة في تغيير أكتوبر</li>
+      </ul>
+    </div>
+  </div>
+  <div class="box grn" style="margin-top:1.6vh">
+    <p><b>بنصرف على إعلانات أصلاً.</b> لو وجّهناها لواتساب بدل الموقع، بناخد 72 ساعة محادثة مجانية بالكامل مع كل عميل —
+    بدون تكلفة رسائل، وبدون خطر حظر، وبموافقته.<br>
+    <b>ده مش تحسين. ده تغيير في نموذج التشغيل.</b></p>
+  </div>
+  <p class="dim" style="margin-top:1vh;font-size:.9em">
+    <b>معايير الحكم بعد 7 أيام:</b> تكلفة الضغطة &lt; $0.15 · ضغطة→محادثة &gt; 70% · محادثة→أوردر &gt; 15% · تكلفة الأوردر &lt; 8% من قيمته
+  </p>
+</section>
+
+<!-- 11 التوصية -->
+<section class="slide">
+  <span class="tag">✅ التوصية</span>
+  <h2>مرحلية — مش قطعية</h2>
+  <pre>┌─ المرحلة 1 · الأسابيع 1-4 ─────────────────────────────┐
+│  🏢 نبدأ رسمي بالكامل                                  │
+│  • التحقق من الأعمال فوراً (مجاني، لحد 3 أسابيع)      │
+│  • 3-5 قوالب بس (تأكيد / شحن / إلغاء / عرض)           │
+│  • نشغّل أول إعلان CTWA                                │
+│  💰 استثمار منخفض    ⚠️ خطر = صفر                     │
+│  🎯 المخرج: عدد محادثاتنا الحقيقي                      │
+└────────────────────────────────────────────────────────┘
+                        ↓
+┌─ نقطة القرار · نهاية الأسبوع 4 ────────────────────────┐
+│  السؤال: عدّينا 625 محادثة/شهر؟                        │
+│                                                        │
+│  ✅ أيوه + السعر اللي Meta نشرته > $0.006              │
+│      → نكمّل للمرحلة 2                                 │
+│  ❌ لأ، أو السعر طلع رخيص                              │
+│      → 🛑 نوقف. الرسمي كفاية.                          │
+│         ووفّرنا 6 أسابيع تطوير وتعقيد دائم.            │
+└────────────────────────────────────────────────────────┘
+                        ↓
+┌─ المرحلة 2 · الأسابيع 5-10 (لو اتبرّرت) ──────────────┐
+│  🔀 نضيف قناة غير رسمية للمحادثات الداخلة بس           │
+│  • رقم أو اتنين (استقبال بس — مش حملات)               │
+│  • تدريجي: 5% → 25% → 60% → 100%                      │
+│  • أي مشكلة → رجوع للرسمي بضغطة زر                     │
+└────────────────────────────────────────────────────────┘</pre>
+  <div class="box red" style="margin-top:1.2vh">
+    <p>❌ <b>ومش بنصح بغير الرسمي بالكامل نهائياً</b> — أغلى ($363-704)، وأخطر (ممكن نخسر كل الأرقام)، وأقل تحويلاً.
+    الخيار الوحيد اللي بيخسر في التلات جبهات.</p>
+  </div>
+</section>
+
+<!-- 12 المطلوب -->
+<section class="slide">
+  <span class="tag">📌 المطلوب منك</span>
+  <h2>4 قرارات + 3 معلومات</h2>
+  <div class="grid g2" style="flex:0">
+    <div class="card off">
+      <h3 class="o">قرارات</h3>
+      <ol class="ask">
+        <li><div><b>نبدأ التحقق من الأعمال بكرة</b><br><span class="dim" style="font-size:.85em">مجاني · لحد 3 أسابيع · مطلوب في أي سيناريو</span></div></li>
+        <li><div><b>حد ميزانية شهري للرسائل</b><br><span class="dim" style="font-size:.85em">عشان أضبط الإيقاف التلقائي</span></div></li>
+        <li><div><b>هنخصّص مطوّر دائم أو لأ؟</b><br><span class="dim" style="font-size:.85em">ده اللي بيحدّد لو الهجين خيار من الأصل</span></div></li>
+        <li><div><b>موافقة على أول إعلان CTWA</b><br><span class="dim" style="font-size:.85em">أعلى مكسب بأقل مخاطرة</span></div></li>
+      </ol>
+    </div>
+    <div class="card hyb">
+      <h3 class="h">معلومات</h3>
+      <ul class="plain" style="margin-top:.6vh">
+        <li><span>📊</span><div><b>عدد محادثات العملاء الشهري</b><br><span class="dim" style="font-size:.85em">بدونه مش هينفع نقرّر بين رسمي وهجين</span></div></li>
+        <li><span>📊</span><div><b>بنبيع لأمريكا؟</b><br><span class="dim" style="font-size:.85em">لو أيوه، فيه مخاطرة TCPA لازم نتعامل معاها</span></div></li>
+        <li><span>📊</span><div><b>ميزانية الإعلانات الحالية</b><br><span class="dim" style="font-size:.85em">عشان أقدّر مكسب CTWA</span></div></li>
+      </ul>
+      <div class="box yel" style="margin-top:auto;margin-bottom:0">
+        <p style="font-size:.9em">⚡ <b>أسرع حاجة نبدأ بيها النهارده:</b> التحقق من الأعمال.
+        مجاني، بياخد لحد 3 أسابيع، ومطلوب في أي قرار. لو بدأناه بكرة بنكسب 3 أسابيع.</p>
+      </div>
+    </div>
+  </div>
+</section>
+
+<!-- 13 الخلاصة -->
+<section class="slide center">
+  <span class="tag">30 ثانية</span>
+  <div style="max-width:60ch;text-align:right">
+    <div class="box" style="border-right:5px solid var(--off)">
+      <p><b class="o">🏢 رسمي:</b> آمن، أبسط، بيغلى أكتوبر</p>
+    </div>
+    <div class="box" style="border-right:5px solid var(--hyb)">
+      <p><b class="h">🔀 هجين:</b> أوفر فوق 625 محادثة، تعقيد 3 أضعاف</p>
+    </div>
+    <div class="box" style="border-right:5px solid var(--un)">
+      <p><b class="u">⚡ غير رسمي:</b> الأغلى + الأخطر + أقل تحويل ❌</p>
+    </div>
+    <div class="box grn">
+      <p><b>✅ التوصية:</b> نبدأ رسمي 4 أسابيع → نقيس → نقرّر بأرقام حقيقية<br>
+      <b>وننفّذ CTWA فوراً</b> — 72 ساعة مجانية مؤكدة</p>
+    </div>
+  </div>
+  <p class="dim" style="margin-top:2.4vh;font-size:.85em">
+    ⚠️ كل الأسعار تقديرات مبنية على أبحاث أغسطس 2026 · Meta غيّرت نموذج الفاتورة يوليو 2025 وفيه تغيير معلن لأكتوبر 2026 بدون سعر منشور
+  </p>
+</section>
+
+<div class="pill">اضغط <b>←</b> <b>→</b> للتنقل · <b>P</b> للطباعة PDF</div>
+<div class="nav">
+  <button onclick="go(1)">‹</button>
+  <span id="c">1 / 13</span>
+  <button onclick="go(-1)">›</button>
+</div>
+<div class="bar"><i id="b"></i></div>
+
+<script>
+const S=[...document.querySelectorAll('.slide')];let i=0;
+function show(n){
+  i=Math.max(0,Math.min(S.length-1,n));
+  S.forEach((s,x)=>s.classList.toggle('on',x===i));
+  document.getElementById('c').textContent=`${i+1} / ${S.length}`;
+  document.getElementById('b').style.width=((i+1)/S.length*100)+'%';
+}
+// RTL: السهم الشمال = التالي
+function go(d){show(i+d)}
+document.addEventListener('keydown',e=>{
+  if(e.key==='ArrowLeft'||e.key===' '||e.key==='PageDown')go(1);
+  if(e.key==='ArrowRight'||e.key==='PageUp')go(-1);
+  if(e.key==='Home')show(0);
+  if(e.key==='End')show(S.length-1);
+  if(e.key.toLowerCase()==='p')window.print();
+});
+let x0=null;
+addEventListener('touchstart',e=>x0=e.touches[0].clientX,{passive:true});
+addEventListener('touchend',e=>{
+  if(x0===null)return;const d=e.changedTouches[0].clientX-x0;
+  if(Math.abs(d)>50)go(d>0?-1:1);x0=null;
+},{passive:true});
+show(0);
+</script>
+</body>
+</html>
