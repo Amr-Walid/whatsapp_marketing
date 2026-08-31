@@ -1,0 +1,29 @@
+# .NET
+bin/
+obj/
+*.user
+*.suo
+[Dd]ebug/
+[Rr]elease/
+artifacts/
+
+# قواعد بيانات محلية (SQLite للتطوير)
+*.db
+*.db-shm
+*.db-wal
+*.sqlite
+
+# أسرار
+appsettings.Local.json
+.env
+.env.*
+!.env.example
+
+# لوجات
+*.log
+logs/
+
+# core dumps (crash artifacts — أحياناً dotnet بيسيب core بحجم مئات الميجا)
+core
+core.*
+*.core

@@ -18,6 +18,7 @@
 | [`docs/09-HYBRID-ARCHITECTURE.md`](./docs/09-HYBRID-ARCHITECTURE.md) | 🔀 تصميم الهجين: طبقة المزوّدين، `WindowTracker`، `ChannelRouter`، المخطط |
 | [`docs/10-HYBRID-IMPLEMENTATION.md`](./docs/10-HYBRID-IMPLEMENTATION.md) | 🔀 كود الهجين + إدارة القوالب + خطة هجرة 6 أسابيع + دليل CTWA |
 | [`docs/11-MANAGER-PITCH.md`](./docs/11-MANAGER-PITCH.md) | 🎤 **العرض على المدير** — سكربت الكلام، مقارنة الـ3، مخاطر كل واحد، نقطة التعادل، أسئلة متوقعة |
+| [`docs/12-DOTNET-DELIVERY.md`](./docs/12-DOTNET-DELIVERY.md) | ⭐ **تسليم التنفيذ (ASP.NET Core 8 + SQL Server)** — الشغل الفعلي اللي اتنفّذ بالتفصيل الممل: خريطة المشروع، الـ28 endpoint، قاعدة البيانات، الـ42 اختبار، سكربت الديمو، وأسئلة المدير وردودها |
 | [`deck.html`](./deck.html) | 🖥️ ديك عرض 13 شريحة (RTL) — افتحه في المتصفح، `←` `→` للتنقل، `P` للطباعة PDF |
 
 ---
@@ -35,7 +36,48 @@
 
 ## 🎯 الخلاصة السريعة (TL;DR)
 
-### الـ Stack الموصى بيه
+### 🚀 التنفيذ الفعلي (اللي اتبنى بالكود) — ASP.NET Core 8 + SQL Server
+
+> **مهم:** الـ Stack المكتوب تحت في قسم "الموصى بيه" هو التوصية **النظرية القديمة** من مرحلة الدراسة (قبل قرار النظام الهجين). أما **اللي اتنفّذ فعليًا وشغّال دلوقتي** فهو الحل الهجين بالـ .NET، وده المرجع الرسمي:
+
+```
+Runtime:         .NET 8 / ASP.NET Core Minimal API   (القرار النهائي — مش Node.js)
+Data Layer:      SQL Server  (الإنتاج)  +  SQLite (تطوير/اختبار محلي فقط)
+ORM:             EF Core 8 — نفس الموديل بالحرف على المزوّدين الاتنين
+Cache/Queue:     ICacheStore → MemoryCacheStore (تطوير) / Redis بسطر واحد
+Providers:       Official (Meta Cloud API)  +  Unofficial (Evolution/Baileys)
+Router:          ChannelRouter — نقطة القرار الوحيدة في النظام
+Safety:          8 بوابات (Gates) + Kill Switch + CostGuard + TierStore
+UI:              Vanilla JS RTL Dashboard (7 تابات، بدون build step)
+Tests:           xUnit — 42/42 ✅ (منهم مصفوفة القرار 12/12 كـ acceptance gate)
+```
+
+**تشغيل الحل محليًا:**
+
+```bash
+# 1) بناء واختبار
+dotnet build WaHybrid.sln
+dotnet test  tests/WaHybrid.Tests          # المتوقع: Passed! 42/42
+
+# 2) تشغيل (SQLite تلقائيًا في التطوير)
+dotnet run --project src/WaHybrid.Api      # http://localhost:5000
+#    الداشبورد: /     |  Swagger: /swagger  |  الصحة: /health
+
+# 3) التحويل لـ SQL Server (الإنتاج)
+#    - عدّل ConnectionStrings:Default في appsettings.json
+#    - نفّذ سكربتات النشر الجاهزة (idempotent):
+#        db/migrations/001_initial_sqlserver.sql   (10 جداول + 14 index)
+#        db/migrations/002_views_sqlserver.sql     (v_hybrid_dashboard + v_hybrid_efficiency)
+#    - أو خلّي التطبيق يعملها لوحده: EF MigrateAsync + DbViews.ApplyAsync عند الإقلاع
+```
+
+📖 **الشرح الكامل بالتفصيل الممل في** [`docs/12-DOTNET-DELIVERY.md`](./docs/12-DOTNET-DELIVERY.md).
+
+---
+
+### الـ Stack الموصى بيه (توصية نظرية قديمة — للمرجعية فقط ⚠️)
+
+> ⚠️ **ملحوظة:** الكتلة دي من مرحلة الدراسة الأولى (قبل قرار الهجين والـ .NET). سيبناها للتوثيق والمقارنة، بس **المرجع المُنفَّذ هو القسم اللي فوق**.
 
 ```
 Data Layer:      PostgreSQL + Redis (BullMQ Queue)
