@@ -1,0 +1,246 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<title>النظام الهجين لواتساب — لوحة التحكم</title>
+<!-- أيقونة مضمّنة (data URI) — عشان مانطلبش ملف من السيرفر ونجيب 404 -->
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Crect width='32' height='32' rx='8' fill='%23a371f7'/%3E%3Ctext x='16' y='23' font-size='19' font-family='sans-serif' font-weight='bold' text-anchor='middle' fill='%23fff'%3Eو%3C/text%3E%3C/svg%3E">
+<link href="https://fonts.googleapis.com/css2?family=Cairo:wght@400;600;700;900&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="app.css">
+</head>
+<body>
+
+<header class="topbar">
+  <div class="brand">
+    <div class="logo">و</div>
+    <div>
+      <h1>النظام الهجين لواتساب</h1>
+      <p class="sub">دماغ واحدة · فمّين · قاعدة بيانات واحدة</p>
+    </div>
+  </div>
+  <div class="topmeta">
+    <span class="pill" id="pStack">ASP.NET Core 8</span>
+    <span class="pill" id="pDb">—</span>
+    <span class="pill ok" id="pHealth">جاري الاتصال…</span>
+    <button class="btn ghost" id="btnRefresh">↻ تحديث</button>
+  </div>
+</header>
+
+<nav class="tabs">
+  <button class="tab active" data-tab="overview">📊 نظرة عامة</button>
+  <button class="tab" data-tab="matrix">🎯 مصفوفة القرار</button>
+  <button class="tab" data-tab="live">🔬 المختبر الحيّ</button>
+  <button class="tab" data-tab="campaign">📋 تخطيط الحملة</button>
+  <button class="tab" data-tab="gates">🚪 البوابات</button>
+  <button class="tab" data-tab="messages">📨 سجل الرسايل</button>
+  <button class="tab" data-tab="ops">🎛️ التشغيل</button>
+</nav>
+
+<main>
+
+<!-- ══════════════════ نظرة عامة ══════════════════ -->
+<section class="panel active" id="tab-overview">
+
+  <div class="hero">
+    <div class="hero-main">
+      <div class="hero-label">نسبة الرسايل المجانية</div>
+      <div class="hero-value" id="kFree">—</div>
+      <div class="hero-note">المستهدف &gt; 75% — <span id="kFreeVerdict">—</span></div>
+      <div class="bar"><div class="bar-fill" id="kFreeBar"></div><div class="bar-target"></div></div>
+    </div>
+    <div class="hero-side">
+      <div class="mini">
+        <span class="mini-label">اتصرف النهاردة</span>
+        <span class="mini-value" id="kSpent">—</span>
+        <span class="mini-note" id="kSpentPct">—</span>
+      </div>
+      <div class="mini">
+        <span class="mini-label">الوفر المحقّق</span>
+        <span class="mini-value good" id="kSaved">—</span>
+        <span class="mini-note">مقابل إرسال الكل بقوالب رسمية</span>
+      </div>
+    </div>
+  </div>
+
+  <div class="grid4">
+    <div class="card stat"><div class="stat-ico">🎁</div><div><div class="stat-num" id="wFep">—</div><div class="stat-lbl">نافذة FEP (٧٢ ساعة)</div><div class="stat-sub">كل حاجة مجاناً — حتى التسويق</div></div></div>
+    <div class="card stat"><div class="stat-ico">🟡</div><div><div class="stat-num" id="wCsw">—</div><div class="stat-lbl">نافذة CSW (٢٤ ساعة)</div><div class="stat-sub">الرسالة الحرة مسموحة</div></div></div>
+    <div class="card stat"><div class="stat-ico">🔴</div><div><div class="stat-num" id="wNone">—</div><div class="stat-lbl">مفيش نافذة</div><div class="stat-sub">قوالب معتمدة بس</div></div></div>
+    <div class="card stat"><div class="stat-ico">👥</div><div><div class="stat-num" id="cTotal">—</div><div class="stat-lbl">عميل</div><div class="stat-sub"><span id="cCtwa">—</span> منهم من إعلانات CTWA</div></div></div>
+  </div>
+
+  <div class="grid2">
+    <div class="card">
+      <h3>توزيع الرسايل على القناتين</h3>
+      <div class="split" id="splitChannel"></div>
+      <table class="kv">
+        <tr><td><span class="dot off"></span> رسمي (Meta Cloud API)</td><td id="mOff">—</td></tr>
+        <tr><td><span class="dot un"></span> غير رسمي (Evolution)</td><td id="mUn">—</td></tr>
+        <tr><td>رسالة حرة (مجانية)</td><td id="mFree">—</td></tr>
+        <tr><td>قالب معتمد (مدفوع)</td><td id="mTpl">—</td></tr>
+      </table>
+    </div>
+
+    <div class="card">
+      <h3>حالة القناة الرسمية</h3>
+      <table class="kv">
+        <tr><td>الفئة الرسالية (Tier)</td><td id="tTier">—</td></tr>
+        <tr><td>الحد اليومي</td><td id="tLimit">—</td></tr>
+        <tr><td>اتستخدم النهاردة</td><td id="tUsed">—</td></tr>
+        <tr><td>المتاح (headroom)</td><td id="tHead">—</td></tr>
+        <tr><td>تقييم الجودة</td><td id="tQual">—</td></tr>
+        <tr><td>التسويق</td><td id="tMkt">—</td></tr>
+      </table>
+      <div class="note">⚠️ Meta بتصفّر الحد على منتصف ليل <b>UTC</b> — مش التوقيت المحلي.</div>
+    </div>
+  </div>
+
+  <div class="card">
+    <h3>صحة المزوّدين</h3>
+    <div class="providers" id="providers"></div>
+  </div>
+
+</section>
+
+<!-- ══════════════════ مصفوفة القرار ══════════════════ -->
+<section class="panel" id="tab-matrix">
+  <div class="card">
+    <h3>🎯 مصفوفة القرار — بوابة القبول الرسمية</h3>
+    <p class="lead">
+      الجدول ده <b>مش صورة ولا توثيق</b> — ده ناتج حقيقي من الـ <code>ChannelRouter</code>
+      وهو شغّال دلوقتي. كل خلية جاية من نداء فعلي على <code>DecideAsync</code>.
+      وده بالظبط اللي بيتأكد منه اختبار القبول (١٢ حالة، ١٢/١٢ ناجحة).
+    </p>
+    <div class="legend">
+      <span><span class="chip off">رسمي</span> Meta Cloud API — مضمون، مدفوع بره النافذة</span>
+      <span><span class="chip un">غير رسمي</span> Evolution — مجاني، للنوافذ المفتوحة بس</span>
+      <span><span class="chip bad">مرفوض</span> مفيش طريق آمن — النظام بيقول لأ</span>
+    </div>
+    <div class="tablewrap"><table class="matrix" id="matrixTable"></table></div>
+  </div>
+</section>
+
+<!-- ══════════════════ المختبر الحيّ ══════════════════ -->
+<section class="panel" id="tab-live">
+  <div class="card">
+    <h3>🔬 المختبر الحيّ — شوف القرار بيتغيّر قصادك</h3>
+    <p class="lead">
+      اختار عميل ونية، وشوف النظام بياخد إيه قرار و<b>ليه</b>. بعدين اضغط
+      «محاكاة ضغطة إعلان» وشوف نفس الرسالة بتتحوّل من <b>قالب مدفوع</b>
+      لـ <b>رسالة حرة مجانية</b> — ده جوهر النظام كله في تجربة واحدة.
+    </p>
+
+    <div class="controls">
+      <label>العميل
+        <select id="selPhone"></select>
+      </label>
+      <label>النية
+        <select id="selIntent"></select>
+      </label>
+      <button class="btn" id="btnPreview">🔍 اعرض القرار</button>
+    </div>
+
+    <div class="controls sim">
+      <button class="btn warn" id="btnCtwa">🎁 محاكاة ضغطة إعلان (تفتح ٧٢ ساعة)</button>
+      <button class="btn warn" id="btnInbound">🟡 محاكاة رسالة داخلة (تجدّد ٢٤ ساعة)</button>
+      <button class="btn danger" id="btnSend">📤 ابعت فعلاً (مزوّد وهمي)</button>
+      <button class="btn ghost" id="btnIdem">🔁 اختبر منع التكرار</button>
+    </div>
+
+    <div id="liveOut" class="out"></div>
+  </div>
+</section>
+
+<!-- ══════════════════ تخطيط الحملة ══════════════════ -->
+<section class="panel" id="tab-campaign">
+  <div class="card">
+    <h3>📋 تخطيط الحملة — قبل ما تصرف مليم</h3>
+    <p class="lead">
+      التخطيط <b>قراءة بس</b> — مفيش ولا رسالة بتتبعت. بتعرف الحملة هتوصل
+      لكام عميل، على أنهي قناة، بكام، وقد إيه هتوفّر. لو الرقم مش عاجبك،
+      تعدّل قبل ما تصرف.
+    </p>
+    <div class="controls">
+      <label>النية <select id="selCampIntent"></select></label>
+      <label>القطاع <input id="inpSegment" placeholder="كله" size="12"></label>
+      <button class="btn" id="btnPlan">📊 اعمل الخطة</button>
+    </div>
+    <div id="planOut" class="out"></div>
+  </div>
+</section>
+
+<!-- ══════════════════ البوابات ══════════════════ -->
+<section class="panel" id="tab-gates">
+  <div class="card">
+    <h3>🚪 سلسلة البوابات — كل رسالة بتعدّي منها بالترتيب</h3>
+    <p class="lead">
+      الترتيب مقصود: <b>الأرخص والأقطع الأول</b>. مفيش داعي نسأل Meta عن
+      الفئة الرسالية لعميل موجود أصلاً في قائمة الحظر. وأول بوابة تقول
+      «لأ» بتوقّف السلسلة فوراً.
+    </p>
+    <div class="controls">
+      <label>العميل <select id="selGatePhone"></select></label>
+      <label>النية <select id="selGateIntent"></select></label>
+      <button class="btn" id="btnGates">🚪 تتبّع البوابات</button>
+    </div>
+    <div id="gatesOut" class="out"></div>
+  </div>
+</section>
+
+<!-- ══════════════════ سجل الرسايل ══════════════════ -->
+<section class="panel" id="tab-messages">
+  <div class="card">
+    <h3>📨 سجل الرسايل</h3>
+    <p class="lead">
+      كل رسالة بتتسجّل <b>قبل</b> الإرسال مش بعده. لو السيرفر وقع في نص
+      الإرسال، الصف موجود بحالة <code>Sending</code> — فنعرف نحقّق، مش
+      نفضل نخمّن.
+    </p>
+    <div class="tablewrap"><table class="log" id="msgTable"></table></div>
+  </div>
+</section>
+
+<!-- ══════════════════ التشغيل ══════════════════ -->
+<section class="panel" id="tab-ops">
+  <div class="grid2">
+    <div class="card">
+      <h3>🎛️ مفاتيح الإيقاف</h3>
+      <p class="lead">لما تخاف بالليل، بتضغط زرار — مش بتعدّل كود وتعمل deploy.</p>
+      <div class="controls col">
+        <button class="btn danger" data-kill="unofficial" data-on="1">🛑 أوقف القناة غير الرسمية</button>
+        <button class="btn ghost"  data-kill="unofficial" data-on="0">▶️ شغّل القناة غير الرسمية</button>
+        <button class="btn danger" data-kill="global" data-on="1">🛑 أوقف كل حاجة (حتى الحرج)</button>
+        <button class="btn ghost"  data-kill="global" data-on="0">▶️ شغّل كل حاجة</button>
+      </div>
+    </div>
+
+    <div class="card">
+      <h3>💥 محاكاة الأعطال</h3>
+      <p class="lead">وقّع قناة وشوف النظام بيتصرف إزاي — وإمتى بيرفض يتصرف.</p>
+      <div class="controls col">
+        <button class="btn warn" data-sim="official-down">💥 وقّع القناة الرسمية</button>
+        <button class="btn warn" data-sim="unofficial-down">💥 وقّع القناة غير الرسمية</button>
+        <button class="btn warn" data-sim="red">🔴 نزّل الجودة لأحمر</button>
+        <button class="btn ghost" data-sim="reset">♻️ رجّع كل حاجة طبيعي</button>
+      </div>
+      <div class="note">
+        🔴 جرّب: وقّع الرسمي، وبعدين ابعت <b>حملة ترويجية</b> لعميل بره
+        النافذة. النظام هيقول <b>لأ</b> — مش هيحوّلها لغير الرسمي. ده
+        تسويق بارد، والتحويل ده = حظر مؤكد.
+      </div>
+    </div>
+  </div>
+  <div id="opsOut" class="out"></div>
+</section>
+
+</main>
+
+<footer>
+  <span>ASP.NET Core 8 · EF Core · SQL Server (إنتاج) / SQLite (تطوير) · xUnit 42/42 ✅</span>
+  <span><a href="/swagger" target="_blank">Swagger API</a></span>
+</footer>
+
+<script src="app.js"></script>
+</body>
+</html>
